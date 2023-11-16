@@ -1,20 +1,72 @@
-﻿// task5PI.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
-//
+﻿#include <iostream>
+#include <vector>
+#include <algorithm>
 
-#include <iostream>
+const int INF = 1e9;
 
-int main()
-{
-    std::cout << "Hello World!\n";
+using namespace std;
+
+// Функция для вычисления расстояния между двумя городами
+int distance(vector<vector<int>>& graph, int src, int dest) {
+    return graph[src][dest];
 }
 
-// Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"
-// Отладка программы: F5 или меню "Отладка" > "Запустить отладку"
+// Функция для вычисления длины пути
+int calculatePathLength(vector<int>& path, vector<vector<int>>& graph) {
+    int length = 0;
+    for (int i = 0; i < path.size() - 1; ++i) {
+        length += distance(graph, path[i], path[i + 1]);
+    }
+    return length;
+}
 
-// Советы по началу работы 
-//   1. В окне обозревателя решений можно добавлять файлы и управлять ими.
-//   2. В окне Team Explorer можно подключиться к системе управления версиями.
-//   3. В окне "Выходные данные" можно просматривать выходные данные сборки и другие сообщения.
-//   4. В окне "Список ошибок" можно просматривать ошибки.
-//   5. Последовательно выберите пункты меню "Проект" > "Добавить новый элемент", чтобы создать файлы кода, или "Проект" > "Добавить существующий элемент", чтобы добавить в проект существующие файлы кода.
-//   6. Чтобы снова открыть этот проект позже, выберите пункты меню "Файл" > "Открыть" > "Проект" и выберите SLN-файл.
+// Функция для перебора всех возможных путей
+void tsp(vector<vector<int>>& graph, vector<int>& path, vector<bool>& visited, int& minLength) {
+    if (path.size() == graph.size()) {
+        // Путь завершен, вычисляем его длину
+        int currentLength = calculatePathLength(path, graph);
+        // Обновляем минимальную длину, если текущая длина меньше
+        minLength = min(minLength, currentLength);
+        return;
+    }
+
+    for (int i = 0; i < graph.size(); ++i) {
+        if (!visited[i]) {
+            // Посещаем город, добавляем его к пути
+            visited[i] = true;
+            path.push_back(i);
+            tsp(graph, path, visited, minLength);
+            // Отменяем посещение текущего города перед возвратом (backtracking)
+            visited[i] = false;
+            path.pop_back();
+        }
+    }
+}
+
+int main() {
+    setlocale(LC_ALL, "RUS");
+    // Пример графа с расстояниями между городами
+    vector<vector<int>> graph = {
+        {0, 10, 15, 20},
+        {10, 0, 35, 25},
+        {15, 35, 0, 30},
+        {20, 25, 30, 0}
+    };
+
+    int n = graph.size();
+    vector<int> path;
+    vector<bool> visited(n, false);
+    int minLength = INF;
+
+    // Начинаем с первого города (можно выбрать любой другой)
+    path.push_back(0);
+    visited[0] = true;
+
+    // Вызываем функцию для поиска оптимального пути
+    tsp(graph, path, visited, minLength);
+
+    // Выводим результат
+    cout << "Минимальная длина пути: " << minLength << endl;
+
+    return 0;
+}
